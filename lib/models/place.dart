@@ -1,5 +1,19 @@
-//import 'package:uuid/uuid.dart';
+import 'package:uuid/uuid.dart';
 import 'dart:io';
+
+const uuid = Uuid();
+
+class PlaceLocation {
+  final double latitude;
+  final double longitude;
+  final String address;
+
+  const PlaceLocation({
+    required this.latitude,
+    required this.longitude,
+    required this.address,
+  });
+}
 
 class Place {
   Place({

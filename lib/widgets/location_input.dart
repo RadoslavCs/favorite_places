@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
+
 import 'dart:convert';
+
+import '../models/place.dart';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LocationInput extends StatefulWidget {
@@ -12,7 +16,7 @@ class LocationInput extends StatefulWidget {
 }
 
 class _LocationInputState extends State<LocationInput> {
-  LocationData? pickedLocation;
+  PlaceLocation? pickedLocation;
   var isGettingLocation = false;
 
   Future<void> _getCurrentLocation() async {
@@ -44,7 +48,7 @@ class _LocationInputState extends State<LocationInput> {
     final locationData = await location.getLocation();
 
     final lat = locationData.latitude;
-    final lng = locationData.longitude;    
+    final lng = locationData.longitude;
 
     final apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
 
@@ -57,29 +61,38 @@ class _LocationInputState extends State<LocationInput> {
 
     print('Geocoding status: ${resData['status']}');
 
-    if (resData['status'] == 'OK') {
+    if (resData['status'] == 'OK' && (resData['results'] as List).isNotEmpty) {
       final address = resData['results'][0]['formatted_address'];
+
+      if (!mounted) return;
+
+      setState(() {
+        isGettingLocation = false;
+        pickedLocation = PlaceLocation(
+          latitude: lat,
+          longitude: lng,
+          address: address,
+        );
+      });
+
       print('Latitude: $lat, Longitude: $lng');
       print('Address: $address');
     } else {
+      if (!mounted) return;
+
+      setState(() {
+        isGettingLocation = false;
+      });
+
       print('Geocoding error: ${resData['error_message']}');
     }
-
-    setState(() {
-      isGettingLocation = false;
-      pickedLocation = locationData;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget previewContent = Text(
+    Widget previewContent = const Text(
       'No location chosen.',
       textAlign: TextAlign.center,
-      style: Theme.of(context)
-          .textTheme
-          .bodyLarge!
-          .copyWith(color: Theme.of(context).colorScheme.onBackground),
     );
 
     if (isGettingLocation) {
