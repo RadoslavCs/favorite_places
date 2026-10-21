@@ -22,7 +22,13 @@ class PlacesList extends StatelessWidget {
         ),
         title: Text(
           places[index].title,
-          style: Theme.of(context).textTheme.titleMedium,
+          style: Theme.of(context).textTheme.titleMedium!
+              .copyWith(color: Theme.of(context).colorScheme.onBackground),
+        ),
+        subtitle: Text(
+          places[index].location.address,
+          style: Theme.of(context).textTheme.bodySmall!
+              .copyWith(color: Theme.of(context).colorScheme.onBackground),
         ),
         onTap: () {
           Navigator.of(context).push(

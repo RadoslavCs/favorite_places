@@ -1,8 +1,6 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../providers/user_places.dart';
 import '../widgets/image_input.dart';
 import '../widgets/location_input.dart';

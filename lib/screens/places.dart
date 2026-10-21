@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../widgets/places_list.dart';
 import '../providers/user_places.dart';
 import 'add_place.dart';

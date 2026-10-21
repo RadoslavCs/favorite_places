@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
+
 import 'dart:convert';
+
 import '../models/place.dart';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LocationInput extends StatefulWidget {
@@ -73,7 +76,34 @@ class _LocationInputState extends State<LocationInput> {
       'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$apiKey',
     );
 
-    final response = await http.get(url);
+    http.Response response;
+
+    try {
+      response = await http.get(url).timeout(const Duration(seconds: 15));
+    } catch (e) {
+      debugPrint('Chyba pri komunikacii s Google API: $e');
+
+      if (!mounted) return;
+
+      setState(() {
+        isGettingLocation = false;
+      });
+
+      return;
+    }
+
+    if (response.statusCode != 200) {
+      debugPrint('Google API HTTP error: ${response.statusCode}');
+
+      if (!mounted) return;
+
+      setState(() {
+        isGettingLocation = false;
+      });
+
+      return;
+    }
+
     final resData = json.decode(response.body);
 
     print('Geocoding status: ${resData['status']}');
@@ -82,15 +112,6 @@ class _LocationInputState extends State<LocationInput> {
       final address = resData['results'][0]['formatted_address'];
 
       if (!mounted) return;
-
-      /*setState(() {
-        isGettingLocation = false;
-        pickedLocation = PlaceLocation(
-          latitude: lat,
-          longitude: lng,
-          address: address,
-        );
-      });*/
 
       final newLocation = PlaceLocation(
         latitude: lat,
@@ -147,7 +168,8 @@ class _LocationInputState extends State<LocationInput> {
           decoration: BoxDecoration(
             border: Border.all(
               width: 1,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+              color: Theme.of(context).colorScheme.primary
+                  .withValues(alpha: 0.2),
             ),
           ),
           child: previewContent,
