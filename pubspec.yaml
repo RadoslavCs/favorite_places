@@ -12,6 +12,7 @@ dependencies:
   flutter_dotenv: ^6.0.1
   flutter_riverpod: ^3.4.3
   google_fonts: ^6.3.0
+  google_maps_flutter: ^2.19.0
   http: ^1.6.0
   image_picker: ^1.2.4
   location: ^10.0.2

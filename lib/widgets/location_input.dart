@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
-
 import 'dart:convert';
-
 import '../models/place.dart';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:favorite_places/screens/map_screen.dart';
 
 class LocationInput extends StatefulWidget {
   const LocationInput({super.key, required this.onSelectLocation});
@@ -184,7 +182,13 @@ class _LocationInputState extends State<LocationInput> {
               label: const Text('Get Current Location'),
             ),
             TextButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const MapScreen(),
+                  ),
+                );
+              },
               icon: const Icon(Icons.map),
               label: const Text('Select on Map'),
             ),
