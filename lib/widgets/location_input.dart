@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/place.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:favorite_places/screens/map_screen.dart';
+import 'package:favorite_places/screens/map.dart';
 
 class LocationInput extends StatefulWidget {
   const LocationInput({super.key, required this.onSelectLocation});
