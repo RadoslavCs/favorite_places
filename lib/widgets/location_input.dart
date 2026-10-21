@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
-
 import 'dart:convert';
-
 import '../models/place.dart';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LocationInput extends StatefulWidget {
-  const LocationInput({super.key});
+  const LocationInput({super.key, required this.onSelectLocation});
+
+  final void Function(PlaceLocation location) onSelectLocation;
 
   @override
   State<LocationInput> createState() => _LocationInputState();
@@ -84,14 +83,29 @@ class _LocationInputState extends State<LocationInput> {
 
       if (!mounted) return;
 
-      setState(() {
+      /*setState(() {
         isGettingLocation = false;
         pickedLocation = PlaceLocation(
           latitude: lat,
           longitude: lng,
           address: address,
         );
+      });*/
+
+      final newLocation = PlaceLocation(
+        latitude: lat,
+        longitude: lng,
+        address: address,
+      );
+
+      setState(() {
+        isGettingLocation = false;
+        pickedLocation = newLocation;
       });
+
+      widget.onSelectLocation(
+        newLocation,
+      ); // 🔁 odoslanie polohy do parent widgetu
 
       print('Latitude: $lat, Longitude: $lng');
       print('Address: $address');
@@ -133,7 +147,7 @@ class _LocationInputState extends State<LocationInput> {
           decoration: BoxDecoration(
             border: Border.all(
               width: 1,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
             ),
           ),
           child: previewContent,

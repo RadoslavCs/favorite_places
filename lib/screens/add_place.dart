@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/user_places.dart';
 import '../widgets/image_input.dart';
 import '../widgets/location_input.dart';
+import '../models/place.dart';
+
 class AddPlaceScreen extends ConsumerStatefulWidget {
   const AddPlaceScreen({super.key});
 
@@ -16,6 +18,7 @@ class AddPlaceScreen extends ConsumerStatefulWidget {
 class _AddPlaceScreenState extends ConsumerState<AddPlaceScreen> {
   final _titleController = TextEditingController();
   File? _selectedImage;
+  PlaceLocation? _selectedLocation;
 
   void _selectImage(File image) {
     _selectedImage = image;
@@ -23,13 +26,19 @@ class _AddPlaceScreenState extends ConsumerState<AddPlaceScreen> {
 
   void _savePlace() {
     final enteredTitle = _titleController.text;
-    if (enteredTitle.isEmpty || _selectedImage == null) {
+    if (enteredTitle.isEmpty ||
+        _selectedImage == null ||
+        _selectedLocation == null) {
       return;
     }
 
     ref
         .read(userPlacesProvider.notifier)
-        .addPlace(enteredTitle, _selectedImage!);
+        .addPlace(
+          enteredTitle, 
+          _selectedImage!,
+          _selectedLocation!
+        );
     Navigator.of(context).pop();
   }
 
@@ -38,19 +47,23 @@ class _AddPlaceScreenState extends ConsumerState<AddPlaceScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Add New Place')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             TextField(
               controller: _titleController,
               decoration: const InputDecoration(labelText: 'Title'),
             ),
-            const SizedBox(height: 10),            
+            const SizedBox(height: 10),
             Column(
               children: [
                 ImageInput(onPickImage: _selectImage),
                 const SizedBox(height: 16),
-                const LocationInput(),
+                LocationInput(
+                  onSelectLocation: (location) {
+                    _selectedLocation = location;
+                  },
+                ),
               ],
             ),
             const SizedBox(height: 16),

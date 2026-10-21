@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-
 import '../models/place.dart';
 import '../screens/place_detail.dart';
 
