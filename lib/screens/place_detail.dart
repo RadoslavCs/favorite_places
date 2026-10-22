@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../models/place.dart';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import 'map.dart';
 
 class PlaceDetailScreen extends StatelessWidget {
   const PlaceDetailScreen({super.key, required this.place});
@@ -8,25 +12,23 @@ class PlaceDetailScreen extends StatelessWidget {
   final Place place;
 
   String get locationImage {
-  final lat = place.location.latitude;
-  final lng = place.location.longitude;
-  final apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
+    final lat = place.location.latitude;
+    final lng = place.location.longitude;
+    final apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
 
-  return 'https://maps.googleapis.com/maps/api/staticmap'
-      '?center=$lat,$lng'
-      '&zoom=16'
-      '&size=600x300'
-      '&maptype=roadmap'
-      '&markers=color:red%7C$lat,$lng'
-      '&key=$apiKey';
-}
+    return 'https://maps.googleapis.com/maps/api/staticmap'
+        '?center=$lat,$lng'
+        '&zoom=16'
+        '&size=600x300'
+        '&maptype=roadmap'
+        '&markers=color:red%7C$lat,$lng'
+        '&key=$apiKey';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(place.title),
-      ),
+      appBar: AppBar(title: Text(place.title)),
       body: Stack(
         children: [
           Image.file(
@@ -41,9 +43,21 @@ class PlaceDetailScreen extends StatelessWidget {
             right: 0,
             child: Column(
               children: [
-                CircleAvatar(
-                  radius: 70,
-                  backgroundImage: NetworkImage(locationImage),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (ctx) => MapScreen(
+                          location: place.location,
+                          isSelecting: false,
+                        ),
+                      ),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 70,
+                    backgroundImage: NetworkImage(locationImage),
+                  ),
                 ),
                 Container(
                   alignment: Alignment.center,
@@ -53,10 +67,7 @@ class PlaceDetailScreen extends StatelessWidget {
                   ),
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        Colors.transparent,
-                        Colors.black54,
-                      ],
+                      colors: [Colors.transparent, Colors.black54],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
@@ -64,10 +75,9 @@ class PlaceDetailScreen extends StatelessWidget {
                   child: Text(
                     place.location.address,
                     textAlign: TextAlign.center,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge!
-                        .copyWith(color: Theme.of(context).colorScheme.onSurface),
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ],
