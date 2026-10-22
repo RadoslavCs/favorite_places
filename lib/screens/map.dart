@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../models/place.dart';
+
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapScreen extends StatefulWidget {
@@ -21,6 +23,8 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  LatLng? _pickedLocation;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,26 +39,34 @@ class _MapScreenState extends State<MapScreen> {
               onPressed: () {
                 // bude doplnené – uloženie vybranej lokality
               },
-            )
+            ),
         ],
       ),
       body: GoogleMap(
         initialCameraPosition: CameraPosition(
-          target: LatLng(
-            widget.location.latitude,
-            widget.location.longitude,
-          ),
+          target: LatLng(widget.location.latitude, widget.location.longitude),
           zoom: 16,
         ),
-        markers: {
-          Marker(
-            markerId: const MarkerId('m1'),
-            position: LatLng(
-              widget.location.latitude,
-              widget.location.longitude,
-            ),
-          ),
+        onTap: (position) {
+          if (widget.isSelecting) {
+            setState(() {
+              _pickedLocation = position;
+            });
+          }
         },
+        markers: (_pickedLocation == null && widget.isSelecting)
+            ? {}
+            : {
+                Marker(
+                  markerId: const MarkerId('m1'),
+                  position:
+                      _pickedLocation ??
+                      LatLng(
+                        widget.location.latitude,
+                        widget.location.longitude,
+                      ),
+                ),
+              },
       ),
     );
   }
