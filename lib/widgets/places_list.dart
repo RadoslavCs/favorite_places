@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/place.dart';
 import '../screens/place_detail.dart';
 
@@ -23,12 +24,12 @@ class PlacesList extends StatelessWidget {
         title: Text(
           places[index].title,
           style: Theme.of(context).textTheme.titleMedium!
-              .copyWith(color: Theme.of(context).colorScheme.onBackground),
+              .copyWith(color: Theme.of(context).colorScheme.onSurface),
         ),
         subtitle: Text(
           places[index].location.address,
           style: Theme.of(context).textTheme.bodySmall!
-              .copyWith(color: Theme.of(context).colorScheme.onBackground),
+              .copyWith(color: Theme.of(context).colorScheme.onSurface),
         ),
         onTap: () {
           Navigator.of(context).push(

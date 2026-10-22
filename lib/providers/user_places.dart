@@ -40,7 +40,8 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
   ) async {
     final appDir = await getApplicationDocumentsDirectory();
 
-    final fileName = '${DateTime.now().microsecondsSinceEpoch}_${path.basename(image.path)}';
+    final fileName =
+        '${DateTime.now().microsecondsSinceEpoch}_${path.basename(image.path)}';
 
     final savedImage = await image.copy(path.join(appDir.path, fileName));
 

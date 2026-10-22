@@ -13,18 +13,13 @@ class PlacesScreen extends ConsumerStatefulWidget {
 }
 
 class _PlacesScreenState extends ConsumerState<PlacesScreen> {
+  late Future<void> _placesFuture;
+
   @override
   void initState() {
     super.initState();
-    _loadPlaces();
-  }
 
-  Future<void> _loadPlaces() async {
-    try {
-      await ref.read(userPlacesProvider.notifier).loadPlaces();
-    } catch (e) {
-      debugPrint('Failed to load places: $e');
-    }
+    _placesFuture = ref.read(userPlacesProvider.notifier).loadPlaces();
   }
 
   @override
@@ -45,9 +40,22 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8),
-        child: PlacesList(userPlaces),
+      body: FutureBuilder<void>(
+        future: _placesFuture,
+        builder: (ctx, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return const Center(child: Text('Failed to load places.'));
+          }
+
+          return Padding(
+            padding: const EdgeInsets.all(8),
+            child: PlacesList(userPlaces),
+          );
+        },
       ),
     );
   }

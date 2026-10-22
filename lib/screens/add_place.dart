@@ -20,6 +20,12 @@ class _AddPlaceScreenState extends ConsumerState<AddPlaceScreen> {
   File? _selectedImage;
   PlaceLocation? _selectedLocation;
 
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
+
   void _selectImage(File image) {
     _selectedImage = image;
   }

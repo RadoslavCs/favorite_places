@@ -202,7 +202,7 @@ class _LocationInputState extends State<LocationInput> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             TextButton.icon(
-              onPressed: _getCurrentLocation,
+              onPressed: isGettingLocation ? null : _getCurrentLocation,
               icon: const Icon(Icons.location_on),
               label: const Text('Get Current Location'),
             ),
