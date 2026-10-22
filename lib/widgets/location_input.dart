@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
+
 import 'dart:convert';
+
 import '../models/place.dart';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:favorite_places/screens/map.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class LocationInput extends StatefulWidget {
   const LocationInput({super.key, required this.onSelectLocation});
@@ -18,6 +22,17 @@ class LocationInput extends StatefulWidget {
 class _LocationInputState extends State<LocationInput> {
   PlaceLocation? pickedLocation;
   var isGettingLocation = false;
+
+  Future<void> _selectOnMap() async {
+    final selectedLocation = await Navigator.of(context)
+        .push<LatLng>(MaterialPageRoute(builder: (ctx) => const MapScreen()));
+
+    if (selectedLocation == null || !mounted) {
+      return;
+    }
+
+    await _savePlace(selectedLocation.latitude, selectedLocation.longitude);
+  }
 
   String get locationImage {
     if (pickedLocation == null) {
@@ -59,20 +74,29 @@ class _LocationInputState extends State<LocationInput> {
       }
     }
 
-    setState(() {
-      isGettingLocation = true;
-    });
-
     final locationData = await location.getLocation();
 
     final lat = locationData.latitude;
     final lng = locationData.longitude;
 
+    if (!mounted) {
+      return;
+    }
+
+    await _savePlace(lat, lng);
+  }
+
+  Future<void> _savePlace(double latitude, double longitude) async {
+    setState(() {
+      isGettingLocation = true;
+    });
+
     final apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
 
-    final url = Uri.parse(
-      'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$apiKey',
-    );
+    final url = Uri.https('maps.googleapis.com', '/maps/api/geocode/json', {
+      'latlng': '$latitude,$longitude',
+      'key': apiKey ?? '',
+    });
 
     http.Response response;
 
@@ -86,56 +110,57 @@ class _LocationInputState extends State<LocationInput> {
       setState(() {
         isGettingLocation = false;
       });
-
       return;
     }
+
+    if (!mounted) return;
 
     if (response.statusCode != 200) {
       debugPrint('Google API HTTP error: ${response.statusCode}');
 
-      if (!mounted) return;
-
       setState(() {
         isGettingLocation = false;
       });
-
       return;
     }
 
-    final resData = json.decode(response.body);
+    try {
+      final resData = json.decode(response.body);
 
-    print('Geocoding status: ${resData['status']}');
+      if (resData['status'] == 'OK' &&
+          (resData['results'] as List).isNotEmpty) {
+        final address = resData['results'][0]['formatted_address'] as String;
 
-    if (resData['status'] == 'OK' && (resData['results'] as List).isNotEmpty) {
-      final address = resData['results'][0]['formatted_address'];
+        final newLocation = PlaceLocation(
+          latitude: latitude,
+          longitude: longitude,
+          address: address,
+        );
+
+        setState(() {
+          pickedLocation = newLocation;
+          isGettingLocation = false;
+        });
+
+        widget.onSelectLocation(newLocation);
+
+        debugPrint('Latitude: $latitude, Longitude: $longitude');
+        debugPrint('Address: $address');
+      } else {
+        debugPrint('Geocoding error: ${resData['status']}');
+
+        setState(() {
+          isGettingLocation = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Chyba pri spracovani odpovede: $e');
 
       if (!mounted) return;
 
-      final newLocation = PlaceLocation(
-        latitude: lat,
-        longitude: lng,
-        address: address,
-      );
-
-      setState(() {
-        isGettingLocation = false;
-        pickedLocation = newLocation;
-      });
-
-      widget.onSelectLocation(
-        newLocation,
-      ); // 🔁 odoslanie polohy do parent widgetu
-
-      print('Latitude: $lat, Longitude: $lng');
-      print('Address: $address');
-    } else {
-      if (!mounted) return;
-
       setState(() {
         isGettingLocation = false;
       });
-
-      print('Geocoding error: ${resData['error_message']}');
     }
   }
 
@@ -182,13 +207,7 @@ class _LocationInputState extends State<LocationInput> {
               label: const Text('Get Current Location'),
             ),
             TextButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const MapScreen(),
-                  ),
-                );
-              },
+              onPressed: isGettingLocation ? null : _selectOnMap,
               icon: const Icon(Icons.map),
               label: const Text('Select on Map'),
             ),

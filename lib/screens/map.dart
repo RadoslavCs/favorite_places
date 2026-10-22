@@ -36,9 +36,11 @@ class _MapScreenState extends State<MapScreen> {
           if (widget.isSelecting)
             IconButton(
               icon: const Icon(Icons.save),
-              onPressed: () {
-                // bude doplnené – uloženie vybranej lokality
-              },
+              onPressed: _pickedLocation == null
+                  ? null
+                  : () {
+                      Navigator.of(context).pop(_pickedLocation);
+                    },
             ),
         ],
       ),
@@ -47,13 +49,13 @@ class _MapScreenState extends State<MapScreen> {
           target: LatLng(widget.location.latitude, widget.location.longitude),
           zoom: 16,
         ),
-        onTap: (position) {
-          if (widget.isSelecting) {
-            setState(() {
-              _pickedLocation = position;
-            });
-          }
-        },
+        onTap: !widget.isSelecting
+            ? null
+            : (position) {
+                setState(() {
+                  _pickedLocation = position;
+                });
+              },
         markers: (_pickedLocation == null && widget.isSelecting)
             ? {}
             : {
