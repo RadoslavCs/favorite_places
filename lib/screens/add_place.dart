@@ -1,6 +1,8 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../providers/user_places.dart';
 import '../widgets/image_input.dart';
 import '../widgets/location_input.dart';
@@ -22,22 +24,29 @@ class _AddPlaceScreenState extends ConsumerState<AddPlaceScreen> {
     _selectedImage = image;
   }
 
-  void _savePlace() {
-    final enteredTitle = _titleController.text;
+  Future<void> _savePlace() async {
+    final enteredTitle = _titleController.text.trim();
+
     if (enteredTitle.isEmpty ||
         _selectedImage == null ||
         _selectedLocation == null) {
       return;
     }
 
-    ref
-        .read(userPlacesProvider.notifier)
-        .addPlace(
-          enteredTitle, 
-          _selectedImage!,
-          _selectedLocation!
-        );
-    Navigator.of(context).pop();
+    try {
+      await ref
+          .read(userPlacesProvider.notifier)
+          .addPlace(enteredTitle, _selectedImage!, _selectedLocation!);
+
+      if (!mounted) return;
+
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Failed to save place.')));
+    }
   }
 
   @override
